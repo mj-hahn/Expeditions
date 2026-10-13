@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
+/*
+ * Taraia Watch design tokens (SPEC §9).
+ * Mood: expedition logbook meets mission-control readout.
+ * Root font size is 18px, so 1rem = 18px and body text never drops below it.
+ */
+@theme {
+  --color-navy: #0b1f33;
+  --color-navy-2: #12304d;
+  --color-navy-3: #1c4266;
+  --color-teal: #1f7a7a;
+  --color-teal-ink: #175e5e; /* teal dark enough for text on sand (AA) */
+  --color-sand: #f3e9d2;
+  --color-sand-2: #e9dbbb;
+  --color-paper: #fbf7ee;
+  --color-signal: #e8692c;
+  --color-signal-ink: #b4461a; /* signal orange dark enough for text on sand */
+  --color-amber: #d9a441;
+  --color-ink: #1b1b1b;
+  --color-ink-muted: #574f43;
+  --color-rule: #d8c8a4;
+  --color-foam: #eef4f7;
+  --color-foam-muted: #b3c6d6;
+  --color-slate: #4a5b6c;
+
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --radius-card: 1.1rem;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--color-navy);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-sand);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+a {
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 0.08em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-signal);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Paper grain for logbook surfaces; pure CSS, no image request. */
+.paper {
+  background-color: var(--color-paper);
+  background-image:
+    radial-gradient(circle at 20% 10%, rgb(217 164 65 / 0.07), transparent 40%),
+    radial-gradient(circle at 90% 80%, rgb(31 122 122 / 0.06), transparent 45%);
+}
+
+/* Faint chart grid for the navy "mission control" bands. */
+.chart-grid {
+  background-color: var(--color-navy);
+  background-image:
+    linear-gradient(rgb(238 244 247 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(238 244 247 / 0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Live indicator dot, only for the island clock (and later weather). */
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(232 105 44 / 0.65);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgb(232 105 44 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(232 105 44 / 0);
+  }
+}
+.live-dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 9999px;
+  background: var(--color-signal);
+  animation: live-pulse 2s ease-out infinite;
+}
+
+/* Gallery track: native scroll snapping gives swipe for free. */
+.snap-track {
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.snap-track::-webkit-scrollbar {
+  display: none;
+}
+.snap-track > * {
+  scroll-snap-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .live-dot {
+    animation: none;
+  }
 }

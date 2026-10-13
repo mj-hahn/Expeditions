@@ -14,7 +14,7 @@ import {
   type OutgoingEmail,
 } from "@/lib/alerts";
 
-export const runtime = "nodejs";
+// Runs on the Node.js runtime (the default; segment config is disallowed with cacheComponents).
 
 function authorized(req: Request, secret: string): boolean {
   const header = req.headers.get("authorization") ?? "";
