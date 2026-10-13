@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "check": "npm run lint && npm run typecheck && npm run test"
+    "check": "npm run lint && npm run typecheck && npm run test",
+    "fixture": "node scripts/fetch-fixture.mjs"
   },
   "dependencies": {
     "@react-email/components": "^1.0.12",
