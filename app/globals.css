@@ -15,7 +15,7 @@
   --color-sand-2: #e9dbbb;
   --color-paper: #fbf7ee;
   --color-signal: #e8692c;
-  --color-signal-ink: #b4461a; /* signal orange dark enough for text on sand */
+  --color-signal-ink: #a63f16; /* signal orange dark enough for text on every sand surface (AA) */
   --color-amber: #d9a441;
   --color-ink: #1b1b1b;
   --color-ink-muted: #574f43;
@@ -52,14 +52,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1,
-h2,
-h3 {
-  font-family: var(--font-display);
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-}
 
 a {
   text-underline-offset: 0.18em;
@@ -73,7 +65,16 @@ a {
 }
 
 @layer base {
-  /* In the base layer so Tailwind utilities like h-full can override it. */
+  /* In the base layer so Tailwind utilities (font-mono, h-full, ...) can override these. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
   img {
     max-width: 100%;
     height: auto;
@@ -274,4 +275,19 @@ a {
   transform-box: fill-box;
   transform-origin: center;
   animation: ls-fade-in 1.4s 1.2s ease-out both;
+}
+
+/* Journey globe: completed 2026 legs draw in once. */
+@keyframes globe-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.globe-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: globe-draw 1.6s ease-out both;
 }

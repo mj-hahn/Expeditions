@@ -25,7 +25,8 @@ async function getDispatchesCached(): Promise<Dispatch[]> {
     // Errors can't escape a cache scope without failing the render, so cache
     // the outage briefly and try again soon. Pages show a friendly empty state.
     console.error("Purdue fetch failed:", err instanceof Error ? err.message : err);
-    cacheLife({ stale: 30, revalidate: 60, expire: 300 });
+    // stale >= 5 min keeps this in the instant shell; revalidate still retries soon.
+    cacheLife({ stale: 300, revalidate: 60, expire: 600 });
     return [];
   }
 }

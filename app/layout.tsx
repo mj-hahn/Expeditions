@@ -3,10 +3,11 @@ import { Fraunces, IBM_Plex_Mono, Inter } from "next/font/google";
 import { site, siteUrl } from "@/content/site";
 import "./globals.css";
 
+// One static weight keeps the headline font small; it's what the LCP waits for.
 const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
-  axes: ["SOFT", "opsz"],
+  weight: ["600"],
   display: "swap",
 });
 
