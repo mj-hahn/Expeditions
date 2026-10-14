@@ -39,7 +39,7 @@ describe("url and headers", () => {
     expect(u.searchParams.get("_embed")).toBe("wp:featuredmedia");
   });
   it("has a polite user agent", () => {
-    expect(userAgent()).toMatch(/^TaraiaWatch\/1\.0 \(\+.+; contact: .+\)$/);
+    expect(userAgent()).toMatch(/^TaraiaWatch\/1\.0 \(\+.+\)$/);
   });
 });
 
