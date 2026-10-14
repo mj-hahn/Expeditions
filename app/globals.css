@@ -15,7 +15,7 @@
   --color-sand-2: #e9dbbb;
   --color-paper: #fbf7ee;
   --color-signal: #e8692c;
-  --color-signal-ink: #b4461a; /* signal orange dark enough for text on sand */
+  --color-signal-ink: #a63f16; /* signal orange dark enough for text on every sand surface (AA) */
   --color-amber: #d9a441;
   --color-ink: #1b1b1b;
   --color-ink-muted: #574f43;

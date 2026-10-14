@@ -12,7 +12,7 @@ export function Blocks({ blocks }: { blocks: Block[] }) {
             return b.isQuote ? (
               <blockquote
                 key={i}
-                className="my-8 border-l-4 border-amber bg-paper py-4 pr-4 pl-5 font-display text-[1.35rem] leading-[1.5] text-navy italic sm:text-[1.5rem]"
+                className="my-8 border-l-4 border-amber bg-paper py-4 pr-4 pl-5 font-display text-[1.3rem] leading-[1.5] font-semibold text-navy sm:text-[1.45rem]"
               >
                 {b.text}
               </blockquote>

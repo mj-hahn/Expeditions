@@ -12,8 +12,12 @@ npm run check                # lint + typecheck + tests
 npm run fixture              # save live Purdue API response to fixtures/purdue-posts.json
 ```
 
-Offline dev: set `PURDUE_FIXTURE_FILE=fixtures/purdue-posts.json` in `.env.local` to read a saved
-API response instead of Purdue (ignored in production).
+Offline dev: set `PURDUE_FIXTURE_FILE=fixtures/purdue-posts.json` and
+`OPEN_METEO_FIXTURE_DIR=fixtures/open-meteo` in `.env.local` to read saved API responses instead of
+the live APIs (both ignored in production).
+
+Editorial copy lives in `content/facts.ts` and comes only from the Fact Bank in `SPEC.md` §11;
+`content/content.test.ts` fails if a fact or source link isn't in the spec.
 
 ## Update the status
 
