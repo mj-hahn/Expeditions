@@ -4,13 +4,14 @@ import { describe, expect, it } from "vitest";
 import { CREW, CREW_GROUPS } from "@/content/crew";
 import { DID_YOU_KNOW, FACTS, MYSTERY, SKEPTICS, SKEPTICS_CLOSING } from "@/content/facts";
 import { PRESS } from "@/content/press";
+import { TIMELINE_1937 } from "@/content/timeline-1937";
 
 const spec = readFileSync("SPEC.md", "utf8");
 const specUrls = new Set(spec.match(/https:\/\/[^\s)]+/g) ?? []);
 
 describe("facts", () => {
   it("every Fact Bank id in the spec has an entry, and nothing extra", () => {
-    const specIds = new Set([...spec.matchAll(/\*\*([FS]\d+)\.\*\*/g)].map((m) => m[1]));
+    const specIds = new Set([...spec.matchAll(/\*\*([FSHPI]\d+)\.\*\*/g)].map((m) => m[1]));
     expect(new Set(Object.keys(FACTS))).toEqual(specIds);
   });
 
@@ -50,5 +51,14 @@ describe("quiz", () => {
       expect(q.answer).toBeGreaterThanOrEqual(0);
       expect(q.answer).toBeLessThan(q.options.length);
     }
+  });
+});
+
+describe("1937 timeline", () => {
+  it("only uses real facts, and uses each of H1-H11 exactly once", () => {
+    const ids: string[] = TIMELINE_1937.flatMap((e) => e.facts);
+    for (const id of ids) expect(FACTS[id as keyof typeof FACTS], id).toBeDefined();
+    const expected = Array.from({ length: 11 }, (_, i) => `H${i + 1}`);
+    expect([...ids].sort()).toEqual([...expected].sort());
   });
 });

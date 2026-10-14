@@ -513,6 +513,49 @@ Write all explainer, crew and "did you know" copy in plain, warm language using 
 
 ---
 
+### 11.6 Approved additions (Oct 14, 2026)
+
+Verified against the opened source pages (see `docs/fact-bank-draft.md`) and approved by Matt.
+
+**1937, hour by hour** (times are as logged by the Itasca, local time at Howland)
+- **H1.** On July 2, 1937, Earhart and Noonan took off from Lae, New Guinea, for Howland Island, an easterly flight of about 2,556 miles (4,113 km). *(Smithsonian NASM)*
+- **H2.** They left at 10:00 a.m. Lae time, which was midnight Greenwich time. *(Smithsonian NASM; TIGHAR, "Log Jam")*
+- **H3.** She expected to fly at least 18 hours and arrive around sunrise. TIGHAR's reconstruction puts about 1,100 U.S. gallons of fuel aboard at takeoff. *(Smithsonian NASM; TIGHAR, "Log Jam")*
+- **H4.** The Coast Guard cutter Itasca waited at Howland with fuel. Howland is only about 2 miles long and 1 mile wide. *(Smithsonian NASM)*
+- **H5.** Earhart and the Itasca never made two-way contact. Confused radio plans, and the fact that neither she nor Noonan could use Morse code, meant she may never have heard the ship's calls. *(Smithsonian NASM)*
+- **H6.** At 7:42 a.m. the Itasca's radio log reads, as typed: "WE MUST ON ON YOU BUT CANNOT SEE U BUT GAS IS RUNNING LOW BEEN UNABLE TO REACH YOU BY RADIO WE ARE FLYING AT A 1000 FEET." *(TIGHAR, "Log Jam", transcribing the Itasca Primary Radio Log)*
+- **H7.** Her strongest signal came at 7:58 a.m. She was circling, searching and running low on fuel. *(Smithsonian NASM)*
+- **H8.** At 8:43 a.m. the log reads "WE ARE ON THE LINE 157 337 WE WL REPT." It was the last transmission the Itasca received. *(Smithsonian NASM; TIGHAR, "Log Jam")*
+- **H9.** About two hours after losing contact, the Itasca began searching north and northwest of Howland, and kept at it for the next week. *(Pacific Wrecks)*
+- **H10.** The U.S. Navy joined with the battleship Colorado, the seaplane tender Swan, the carrier Lexington and three destroyers: Cushing, Lamson and Drayton. *(Pacific Wrecks)*
+- **H11.** The U.S. government searched from July 2 to July 18, its largest ever search for a lost aircraft, and found no trace of the plane or crew. *(Smithsonian NASM)*
+
+**Earhart at Purdue**
+- **P1.** At Purdue, Earhart held a position as Consultant in the Department of Careers for Women. *(Purdue Archives)*
+- **P2.** Purdue holds the George Palmer Putnam Collection of Amelia Earhart Papers, covering her flying career, personal life and business activities, including twenty scrapbooks compiled by Earhart and Putnam. *(Purdue Archives)*
+
+**Nikumaroro, the island**
+- **I1.** Nikumaroro stretches about 7.5 km by 2.5 km (4.7 by 1.6 miles), surrounded by deep ocean. *(NASA Earth Observatory)*
+- **I2.** It is essentially a sandbar on a coral reef atop a sinking deep-sea volcano. Thick scrub, Pisonia trees and coconut palms hold the sand in place around a central lagoon. *(NASA Earth Observatory)*
+- **I3.** It lies nearly 1,000 miles from Fiji, roughly halfway between Australia and Hawaii. *(NASA Earth Observatory)*
+- **I4.** It was once named Gardner Island by American sailors. *(NASA Earth Observatory)*
+- **I5.** Americans and the British tried several times to settle the island, growing coconuts and even considering it for weapons testing. *(NASA Earth Observatory)*
+- **I6.** In the late 1930s the island was settled under Britain's Phoenix Islands Settlement Scheme; its progress reports date from December 1938. *(TIGHAR Research Bulletin 25)*
+- **I7.** Kiribati declared the island part of the Phoenix Islands Protected Area in 2006. *(NASA Earth Observatory)*
+
+**Sources for 11.6**
+- Smithsonian NASM: https://airandspace.si.edu/stories/editorial/amelia-earhart-missing-80-years-not-forgotten
+- TIGHAR, "Log Jam": https://tighar.org/Publications/TTracks/12_2/logjam.html
+- Pacific Wrecks: https://pacificwrecks.com/aircraft/electra/1055.html
+- Purdue Archives: https://collections.lib.purdue.edu/aearhart/collectiondescription.php
+- NASA Earth Observatory: https://earthobservatory.nasa.gov/images/91889/nikumaroro-atoll
+- TIGHAR Research Bulletin 25: https://tighar.org/Projects/Earhart/Archives/Research/Bulletins/25_GallagherNiku/25_GallagherNiku.html
+
+**Images for 11.6** (public domain or free with credit)
+- NASA Earth Observatory Landsat 8 image of Nikumaroro, July 28, 2014. Credit: NASA Earth Observatory image by Joshua Stevens, using Landsat data from the U.S. Geological Survey. https://earthobservatory.nasa.gov/images/91889/nikumaroro-atoll
+- Earhart in front of the Lockheed Electra (NASA GPN-2002-000211; Smithsonian Institution), public domain: https://commons.wikimedia.org/wiki/File:Amelia_Earhart_-_GPN-2002-000211.jpg
+- Earhart and Noonan by the Electra at Darwin, June 28, 1937, public domain: https://commons.wikimedia.org/wiki/File:Amelia_Earhart_in_Darwin_on_28_June_1937.jpg
+
 ## 12. Environment variables
 
 | Name | Where | Purpose |
