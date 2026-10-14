@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "check": "npm run lint && npm run typecheck && npm run test",
-    "fixture": "node scripts/fetch-fixture.mjs"
+    "fixture": "node scripts/fetch-fixture.mjs",
+    "qa:globe": "node scripts/qa-globe.mjs"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
