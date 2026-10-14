@@ -53,8 +53,32 @@ export function ExploreMore({ dispatches }: { dispatches: Dispatch[] }) {
         <Link href="/diary" className={CARD}>
           <span className="min-w-0 flex-1">
             <span className="block font-display text-[1.3rem] font-semibold text-navy">Expedition diary</span>
-            <span className="mt-1 block">Day by day, from the hangar at Purdue to the lagoon.</span>
+            <span className="mt-1 block">Day by day, from Purdue to the lagoon.</span>
             <span className="mt-1 block font-semibold text-teal-ink">{days === 1 ? "1 day" : `${days} days`} so far</span>
+          </span>
+        </Link>
+        <Link href="/1937" className={CARD}>
+          <span className="grid size-24 shrink-0 place-items-center rounded-xl bg-navy" aria-hidden="true">
+            <svg viewBox="0 0 48 48" className="size-14" fill="none" stroke="#d9a441" strokeWidth="3" strokeLinecap="round">
+              <circle cx="14" cy="34" r="3" fill="#d9a441" />
+              <path d="M14 22a12 12 0 0 1 12 12M14 12a22 22 0 0 1 22 22M14 2a32 32 0 0 1 32 32" />
+            </svg>
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-display text-[1.3rem] font-semibold text-navy">1937, hour by hour</span>
+            <span className="mt-1 block">Earhart&rsquo;s last flight, from takeoff to the final radio call.</span>
+          </span>
+        </Link>
+        <Link href="/island" className={CARD}>
+          <span className="grid size-24 shrink-0 place-items-center rounded-xl bg-navy" aria-hidden="true">
+            <svg viewBox="0 0 48 48" className="size-14" fill="none" stroke="#d9a441" strokeWidth="3" strokeLinecap="round">
+              <ellipse cx="24" cy="24" rx="19" ry="11" />
+              <ellipse cx="24" cy="24" rx="8" ry="4" fill="#d9a441" fillOpacity="0.35" />
+            </svg>
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-display text-[1.3rem] font-semibold text-navy">The island</span>
+            <span className="mt-1 block">Nikumaroro from space, and how it got its names.</span>
           </span>
         </Link>
       </div>
