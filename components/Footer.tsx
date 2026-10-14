@@ -13,6 +13,12 @@ export function Footer() {
               Purdue University News
             </a>
           </li>
+          <li>
+            Weather and sea data:{" "}
+            <a href={site.openMeteoUrl} className="font-semibold text-amber underline" target="_blank" rel="noopener noreferrer">
+              Open-Meteo.com
+            </a>
+          </li>
           <li className="text-foam-muted">Photo captions and credits are shown as published.</li>
         </ul>
       </div>
