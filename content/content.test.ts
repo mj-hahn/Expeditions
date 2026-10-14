@@ -10,7 +10,7 @@ const specUrls = new Set(spec.match(/https:\/\/[^\s)]+/g) ?? []);
 
 describe("facts", () => {
   it("every Fact Bank id in the spec has an entry, and nothing extra", () => {
-    const specIds = new Set([...spec.matchAll(/\*\*([FS]\d+)\.\*\*/g)].map((m) => m[1]));
+    const specIds = new Set([...spec.matchAll(/\*\*([FSHPI]\d+)\.\*\*/g)].map((m) => m[1]));
     expect(new Set(Object.keys(FACTS))).toEqual(specIds);
   });
 

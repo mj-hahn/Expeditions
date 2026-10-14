@@ -55,6 +55,21 @@ const SRC = {
     name: "Indian Defence Review",
     url: "https://indiandefencereview.com/mysterious-object-pacific-lagoon-amelia-earhart-lost-plane/",
   },
+  nasm: {
+    name: "Smithsonian National Air and Space Museum",
+    url: "https://airandspace.si.edu/stories/editorial/amelia-earhart-missing-80-years-not-forgotten",
+  },
+  tigharLogJam: { name: "TIGHAR, “Log Jam”", url: "https://tighar.org/Publications/TTracks/12_2/logjam.html" },
+  pacificWrecks: { name: "Pacific Wrecks", url: "https://pacificwrecks.com/aircraft/electra/1055.html" },
+  purdueArchives: {
+    name: "Purdue University Archives",
+    url: "https://collections.lib.purdue.edu/aearhart/collectiondescription.php",
+  },
+  nasaEO: { name: "NASA Earth Observatory", url: "https://earthobservatory.nasa.gov/images/91889/nikumaroro-atoll" },
+  tigharBulletin25: {
+    name: "TIGHAR Research Bulletin 25",
+    url: "https://tighar.org/Projects/Earhart/Archives/Research/Bulletins/25_GallagherNiku/25_GallagherNiku.html",
+  },
 } satisfies Record<string, Source>;
 
 export const FACTS = {
@@ -172,6 +187,103 @@ export const FACTS = {
     id: "S5",
     text: "Until the team inspects it on site, the Taraia Object is an object of interest, not confirmed evidence.",
     sources: [],
+  },
+  // SPEC §11.6, approved Oct 14, 2026. Times are as logged by the Itasca (local time at Howland).
+  H1: {
+    id: "H1",
+    text: "On July 2, 1937, Earhart and Noonan took off from Lae, New Guinea, for Howland Island: an easterly flight of about 2,556 miles.",
+    sources: [SRC.nasm],
+  },
+  H2: {
+    id: "H2",
+    text: "They left at 10:00 a.m. Lae time, which was midnight Greenwich time.",
+    sources: [SRC.nasm, SRC.tigharLogJam],
+  },
+  H3: {
+    id: "H3",
+    text: "She expected to fly at least 18 hours and arrive around sunrise. TIGHAR's reconstruction puts about 1,100 gallons of fuel aboard at takeoff.",
+    sources: [SRC.nasm, SRC.tigharLogJam],
+  },
+  H4: {
+    id: "H4",
+    text: "The Coast Guard cutter Itasca waited at Howland with fuel. Howland is only about 2 miles long and 1 mile wide.",
+    sources: [SRC.nasm],
+  },
+  H5: {
+    id: "H5",
+    text: "Earhart and the Itasca never made two-way contact. Confused radio plans, and the fact that neither she nor Noonan could use Morse code, meant she may never have heard the ship's calls.",
+    sources: [SRC.nasm],
+  },
+  H6: {
+    id: "H6",
+    text: "The Itasca's radio operator typed: “WE MUST ON ON YOU BUT CANNOT SEE U BUT GAS IS RUNNING LOW BEEN UNABLE TO REACH YOU BY RADIO WE ARE FLYING AT A 1000 FEET.”",
+    sources: [SRC.tigharLogJam],
+  },
+  H7: {
+    id: "H7",
+    text: "Her strongest signal came in. She was circling, searching and running low on fuel.",
+    sources: [SRC.nasm],
+  },
+  H8: {
+    id: "H8",
+    text: "The log reads “WE ARE ON THE LINE 157 337 WE WL REPT.” It was the last transmission the Itasca received.",
+    sources: [SRC.nasm, SRC.tigharLogJam],
+  },
+  H9: {
+    id: "H9",
+    text: "About two hours after losing contact, the Itasca began searching north and northwest of Howland, and kept at it for the next week.",
+    sources: [SRC.pacificWrecks],
+  },
+  H10: {
+    id: "H10",
+    text: "The U.S. Navy joined in with the battleship Colorado, the seaplane tender Swan, the carrier Lexington and three destroyers: Cushing, Lamson and Drayton.",
+    sources: [SRC.pacificWrecks],
+  },
+  H11: {
+    id: "H11",
+    text: "The U.S. government searched until July 18, its largest ever search for a lost aircraft, and found no trace of the plane or crew.",
+    sources: [SRC.nasm],
+  },
+  P1: {
+    id: "P1",
+    text: "At Purdue, Earhart held a position as Consultant in the Department of Careers for Women.",
+    sources: [SRC.purdueArchives],
+  },
+  P2: {
+    id: "P2",
+    text: "Purdue still holds the George Palmer Putnam Collection of her papers, covering her flying, her personal life and her business work, including twenty scrapbooks she and Putnam put together.",
+    sources: [SRC.purdueArchives],
+  },
+  I1: {
+    id: "I1",
+    text: "Nikumaroro stretches about 7.5 km by 2.5 km (4.7 by 1.6 miles), surrounded by deep ocean.",
+    sources: [SRC.nasaEO],
+  },
+  I2: {
+    id: "I2",
+    text: "It is essentially a sandbar on a coral reef, sitting on top of a sinking deep-sea volcano. Thick scrub, Pisonia trees and coconut palms hold the sand in place around a central lagoon.",
+    sources: [SRC.nasaEO],
+  },
+  I3: {
+    id: "I3",
+    text: "It lies nearly 1,000 miles from Fiji, roughly halfway between Australia and Hawaii.",
+    sources: [SRC.nasaEO],
+  },
+  I4: { id: "I4", text: "It was once named Gardner Island by American sailors.", sources: [SRC.nasaEO] },
+  I5: {
+    id: "I5",
+    text: "Americans and the British tried several times to settle the island, growing coconuts and even considering it for weapons testing.",
+    sources: [SRC.nasaEO],
+  },
+  I6: {
+    id: "I6",
+    text: "In the late 1930s the island was settled under Britain's Phoenix Islands Settlement Scheme; its progress reports date from December 1938.",
+    sources: [SRC.tigharBulletin25],
+  },
+  I7: {
+    id: "I7",
+    text: "Kiribati declared the island part of the Phoenix Islands Protected Area in 2006.",
+    sources: [SRC.nasaEO],
   },
 } satisfies Record<string, Fact>;
 
