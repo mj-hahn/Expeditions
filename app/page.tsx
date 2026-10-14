@@ -2,6 +2,7 @@ import { Crew } from "@/components/Crew";
 import { DispatchTimeline } from "@/components/DispatchTimeline";
 import { Footer } from "@/components/Footer";
 import { InTheNews } from "@/components/InTheNews";
+import { JourneyMap } from "@/components/JourneyMap";
 import { LatestDispatchCard } from "@/components/LatestDispatchCard";
 import { Mystery } from "@/components/Mystery";
 import { RightNow } from "@/components/RightNow";
@@ -24,6 +25,7 @@ export default async function Home() {
         {latest && <LatestDispatchCard dispatch={latest} />}
         <RightNow conditions={conditions} />
         <SearchProgress status={status} tide={conditions.marine?.tide ?? null} />
+        <JourneyMap phase={status.phase} />
         <DispatchTimeline dispatches={dispatches} />
         <Mystery />
         <SkepticsCorner />
