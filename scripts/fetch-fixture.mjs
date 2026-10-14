@@ -13,7 +13,7 @@ url.search = new URLSearchParams({
 }).toString();
 
 const res = await fetch(url, {
-  headers: { "User-Agent": "TaraiaWatch/1.0 (fixture capture)", Accept: "application/json" },
+  headers: { "User-Agent": "LuisasLookout/1.0 (fixture capture)", Accept: "application/json" },
 });
 if (!res.ok) throw new Error(`Purdue API responded ${res.status}`);
 const posts = await res.json();

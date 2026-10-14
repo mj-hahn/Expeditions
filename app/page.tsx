@@ -1,6 +1,7 @@
 import { Crew } from "@/components/Crew";
 import { DispatchTimeline } from "@/components/DispatchTimeline";
 import { Footer } from "@/components/Footer";
+import { HowItWorks } from "@/components/HowItWorks";
 import { InTheNews } from "@/components/InTheNews";
 import { JourneyMap } from "@/components/JourneyMap";
 import { LatestDispatchCard } from "@/components/LatestDispatchCard";
@@ -22,6 +23,7 @@ export default async function Home() {
     <>
       <main>
         <StatusHero status={status} latest={latest} />
+        <HowItWorks />
         {latest && <LatestDispatchCard dispatch={latest} />}
         <RightNow conditions={conditions} />
         <SearchProgress status={status} tide={conditions.marine?.tide ?? null} />

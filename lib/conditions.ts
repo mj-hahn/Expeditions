@@ -40,7 +40,7 @@ export function marineUrl(tz: string): string {
 export async function fetchJson(url: string): Promise<{ status: number; json: unknown }> {
   const res = await fetch(url, {
     signal: AbortSignal.timeout(10_000),
-    headers: { "User-Agent": `TaraiaWatch/1.0 (+${siteUrl()})`, Accept: "application/json" },
+    headers: { "User-Agent": `LuisasLookout/1.0 (+${siteUrl()})`, Accept: "application/json" },
   });
   if (!res.ok) return { status: res.status, json: null };
   return { status: res.status, json: await res.json() };
