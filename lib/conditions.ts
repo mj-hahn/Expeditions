@@ -194,7 +194,8 @@ export async function getConditions(): Promise<Conditions> {
   if (w.status === "fulfilled" || m.status === "fulfilled") {
     cacheLife({ stale: 300, revalidate: 1800, expire: 86400 });
   } else {
-    cacheLife({ stale: 30, revalidate: 120, expire: 600 });
+    // stale >= 5 min keeps this in the instant shell; revalidate still retries soon.
+    cacheLife({ stale: 300, revalidate: 120, expire: 600 });
   }
   return { weather, marine };
 }

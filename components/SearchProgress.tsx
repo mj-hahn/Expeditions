@@ -1,3 +1,4 @@
+import { FactText } from "@/components/FactText";
 import { LagoonSection } from "@/components/LagoonSection";
 import { PhaseStepper } from "@/components/PhaseStepper";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -9,6 +10,7 @@ export function SearchProgress({ status, tide }: { status: Status; tide: TidePoi
     <section aria-labelledby="progress-heading" className="mx-auto max-w-[720px] px-5 pt-12 sm:px-8">
       <SectionHeading kicker="Search progress" title="Where the search stands" id="progress-heading" />
       <LagoonSection phase={status.phase} verdict={status.verdict} tide={tide} />
+      <FactText id="F11" className="mt-6" />
       <div className="mt-8">
         <PhaseStepper phase={status.phase} />
       </div>

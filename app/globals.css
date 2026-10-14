@@ -52,14 +52,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1,
-h2,
-h3 {
-  font-family: var(--font-display);
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  text-wrap: balance;
-}
 
 a {
   text-underline-offset: 0.18em;
@@ -73,7 +65,16 @@ a {
 }
 
 @layer base {
-  /* In the base layer so Tailwind utilities like h-full can override it. */
+  /* In the base layer so Tailwind utilities (font-mono, h-full, ...) can override these. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
   img {
     max-width: 100%;
     height: auto;
