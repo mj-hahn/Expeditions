@@ -7,7 +7,7 @@ import { ZoomFigure } from "@/components/dispatch/ZoomFigure";
 import { DispatchTimes } from "@/components/DispatchTimes";
 import { Footer } from "@/components/Footer";
 import { ShareButton } from "@/components/ShareButton";
-import { site } from "@/content/site";
+import { TopBar } from "@/components/TopBar";
 import { getDispatchBySlug, getDispatches } from "@/lib/dispatches";
 import { shortTitle } from "@/lib/purdue";
 import type { Dispatch } from "@/lib/types";
@@ -33,22 +33,6 @@ export async function generateMetadata({ params }: PageProps<"/dispatch/[slug]">
     openGraph: { title: d.title, description: d.lead.slice(0, 200), type: "article" },
     twitter: { card: "summary_large_image", title: d.title },
   };
-}
-
-function TopBar() {
-  return (
-    <header className="bg-navy text-foam">
-      <div className="mx-auto flex max-w-[720px] items-center justify-between gap-4 px-5 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:px-8">
-        <Link
-          href="/"
-          className="-ml-2 flex min-h-12 items-center gap-2 rounded-full px-2 text-[1.05rem] font-semibold hover:underline"
-        >
-          <span aria-hidden="true">←</span> {site.name}
-        </Link>
-        <span className="flex items-center gap-2 font-mono text-[1rem] text-foam-muted">Dispatch</span>
-      </div>
-    </header>
-  );
 }
 
 function SourceLine({ d }: { d: Dispatch }) {
@@ -153,7 +137,7 @@ function ArticleSkeleton() {
 export default function DispatchPage({ params }: PageProps<"/dispatch/[slug]">) {
   return (
     <>
-      <TopBar />
+      <TopBar label="Dispatch" />
       <main>
         <Suspense fallback={<ArticleSkeleton />}>
           <DispatchArticle params={params} />

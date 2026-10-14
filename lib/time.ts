@@ -153,3 +153,13 @@ export function relativeTime(date: Date, now: Date): string {
 export function isWithinHours(date: Date, now: Date, hours: number): boolean {
   return Math.abs(now.getTime() - date.getTime()) <= hours * HOUR_MS;
 }
+
+/**
+ * The instant at which the island wall clock reads `ymd` ("YYYY-MM-DD") at
+ * `hour` (may be fractional). Offset comes from ISLAND_TZ, not a constant.
+ */
+export function islandInstant(ymd: string, hour = 12): Date {
+  const [y, m, d] = ymd.split("-").map(Number);
+  const guess = new Date(Date.UTC(y, m - 1, d, 0, 0, 0) + hour * HOUR_MS);
+  return new Date(guess.getTime() - offsetMinutes(guess, ISLAND_TZ) * MINUTE_MS);
+}

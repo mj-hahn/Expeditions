@@ -1,6 +1,7 @@
 "use client";
 
 import { Clocks } from "@/components/Clocks";
+import { NightSky } from "@/components/NightSky";
 import { TideSparkline } from "@/components/TideSparkline";
 import { WeatherIcon } from "@/components/WeatherIcon";
 import { site } from "@/content/site";
@@ -94,6 +95,8 @@ export function RightNowPanel({ conditions }: { conditions: Conditions }) {
           <TideSparkline tide={marine.tide} now={new Date(now)} />
         </div>
       )}
+
+      <NightSky />
 
       {(weather || marine) && (
         <p className="text-[0.75rem] text-foam-muted">
