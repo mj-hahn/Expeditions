@@ -144,3 +144,134 @@ a {
     animation: none;
   }
 }
+
+/* Pulsing ring for the current search step. */
+@keyframes ring-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(232 105 44 / 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgb(232 105 44 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(232 105 44 / 0);
+  }
+}
+.live-ring {
+  animation: ring-pulse 2.2s ease-out infinite;
+}
+
+/*
+ * Lagoon cross-section overlays (SPEC §7.3). Each element's resting style is a sensible
+ * static frame, so prefers-reduced-motion (which collapses animations above) still reads.
+ */
+@keyframes ls-sweep {
+  0%,
+  100% {
+    transform: translateX(-100px);
+  }
+  50% {
+    transform: translateX(30px);
+  }
+}
+.ls-boat-sweep {
+  animation: ls-sweep 9s ease-in-out infinite;
+}
+@keyframes ls-dash {
+  to {
+    stroke-dashoffset: -22;
+  }
+}
+.ls-dash {
+  animation: ls-dash 1.6s linear infinite;
+}
+@keyframes ls-ping {
+  0% {
+    transform: scale(0.3);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+.ls-ping {
+  animation: ls-ping 2.4s ease-out infinite;
+}
+.ls-ping-1 {
+  animation-delay: 0.8s;
+}
+.ls-ping-2 {
+  animation-delay: 1.6s;
+}
+@keyframes ls-probe {
+  0% {
+    stroke-dashoffset: 1;
+  }
+  45%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+.ls-probe {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: ls-probe 4s ease-in infinite;
+}
+@keyframes ls-touch {
+  0%,
+  40% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+.ls-touch {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ls-touch 4s ease-out infinite;
+}
+@keyframes ls-rise {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-46px);
+    opacity: 0;
+  }
+}
+.ls-rise {
+  animation: ls-rise 3s ease-out infinite;
+}
+.ls-rise-1 {
+  animation-delay: 1s;
+}
+.ls-rise-2 {
+  animation-delay: 2s;
+}
+@keyframes ls-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes ls-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+.ls-fade-out {
+  animation: ls-fade-out 1.4s 0.6s ease-in forwards;
+}
+.ls-fade-in {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ls-fade-in 1.4s 1.2s ease-out both;
+}

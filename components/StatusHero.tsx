@@ -1,5 +1,4 @@
 import { AtollMark } from "@/components/AtollMark";
-import { Clocks } from "@/components/Clocks";
 import { RelativeTime } from "@/components/RelativeTime";
 import { StatusLine } from "@/components/StatusLine";
 import { VerdictPill } from "@/components/VerdictPill";
@@ -48,10 +47,6 @@ export function StatusHero({ status, latest }: { status: Status; latest?: Dispat
             )}
           </p>
         )}
-
-        <div className="mt-8">
-          <Clocks />
-        </div>
       </div>
     </section>
   );
