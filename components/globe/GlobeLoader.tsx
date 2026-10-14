@@ -12,7 +12,7 @@ const JourneyGlobe = dynamic(() => import("@/components/globe/JourneyGlobe"), {
 
 function GlobePlaceholder() {
   return (
-    <div className="mx-auto aspect-square w-full max-w-[480px] rounded-full bg-navy-3/40 ring-1 ring-foam/10" aria-hidden="true" />
+    <div className="mx-auto aspect-square w-full max-w-[600px] rounded-full bg-navy-3/40 ring-1 ring-foam/10" aria-hidden="true" />
   );
 }
 

@@ -305,3 +305,20 @@ a {
 .star-twinkle {
   animation: star-twinkle 3.2s ease-in-out infinite;
 }
+
+/* Journey globe: "team is here" pulse. */
+@keyframes globe-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  to {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+.globe-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: globe-ping 1.8s ease-out infinite;
+}

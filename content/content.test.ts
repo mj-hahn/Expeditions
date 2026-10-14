@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { CREW, CREW_GROUPS } from "@/content/crew";
 import { DID_YOU_KNOW, FACTS, MYSTERY, SKEPTICS, SKEPTICS_CLOSING } from "@/content/facts";
+import { STOPS } from "@/content/globe-stops";
 import { PRESS } from "@/content/press";
 import { TIMELINE_1937 } from "@/content/timeline-1937";
 
@@ -60,5 +61,12 @@ describe("1937 timeline", () => {
     for (const id of ids) expect(FACTS[id as keyof typeof FACTS], id).toBeDefined();
     const expected = Array.from({ length: 11 }, (_, i) => `H${i + 1}`);
     expect([...ids].sort()).toEqual([...expected].sort());
+  });
+});
+
+describe("globe stops", () => {
+  it("only reference existing facts, with unique keys", () => {
+    for (const stop of STOPS) for (const id of stop.facts) expect(FACTS[id], `${stop.key} ${id}`).toBeDefined();
+    expect(new Set(STOPS.map((s) => s.key)).size).toBe(STOPS.length);
   });
 });
