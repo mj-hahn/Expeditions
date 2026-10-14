@@ -31,6 +31,10 @@ export function Img({ photo, sizes, className, eager, alt }: Props) {
       referrerPolicy="no-referrer"
       className={className}
       onError={() => setFailed(true)}
+      // An image can fail before hydration attaches onError; catch that case on mount.
+      ref={(el) => {
+        if (el && el.complete && el.naturalWidth === 0) setFailed(true);
+      }}
     />
   );
 }

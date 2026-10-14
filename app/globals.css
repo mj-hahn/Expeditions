@@ -291,3 +291,17 @@ a {
   stroke-dashoffset: 0;
   animation: globe-draw 1.6s ease-out both;
 }
+
+/* Night-mode hero stars. */
+@keyframes star-twinkle {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+.star-twinkle {
+  animation: star-twinkle 3.2s ease-in-out infinite;
+}

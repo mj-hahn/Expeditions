@@ -40,3 +40,15 @@ describe("crew and press", () => {
     for (const p of PRESS) expect(specUrls, p.url).toContain(p.url);
   });
 });
+
+describe("quiz", () => {
+  it("draws every question from an existing fact, with a valid answer", async () => {
+    const { QUIZ } = await import("@/content/quiz");
+    expect(QUIZ.length).toBeGreaterThanOrEqual(6);
+    for (const q of QUIZ) {
+      expect(FACTS[q.fact], q.q).toBeDefined();
+      expect(q.answer).toBeGreaterThanOrEqual(0);
+      expect(q.answer).toBeLessThan(q.options.length);
+    }
+  });
+});
