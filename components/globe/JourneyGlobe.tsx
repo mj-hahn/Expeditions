@@ -6,13 +6,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
 import land110 from "world-atlas/land-110m.json";
+import Link from "next/link";
 import { FactText } from "@/components/FactText";
-import { STOPS, type Stop } from "@/content/globe-stops";
+import type { FactId } from "@/content/facts";
+import { STOPS } from "@/content/globe-stops";
 import { LEG_1937, LEGS_2026, PLACES, SPUR_1937, type PlaceId } from "@/content/route-points";
+import type { DispatchPin } from "@/lib/dateline-place";
 import { subsolarPoint } from "@/lib/sun";
 import { phaseIndex } from "@/lib/status";
 import type { Phase } from "@/lib/types";
+import { formatShortDate } from "@/lib/time";
 import { useNow } from "@/lib/use-now";
+import { voyageTrack } from "@/lib/voyage";
 
 // Orthographic globe of both journeys (SPEC §7.4). No tiles, no API keys.
 const SIZE = 360;
@@ -38,8 +43,32 @@ const LAND_110 = toLand(land110);
 const GRATICULE = geoGraticule10();
 const GRATICULE_FINE = geoGraticule().step([2, 2])();
 
-const PLACE_IDS = Object.keys(PLACES) as PlaceId[];
-const NIKU_2026 = STOPS.find((s) => s.key === "niku-2026")!;
+const SHIP_D = "M-8 0h16l-3.5 6h-9zM-2 0v-6h5v6z";
+const LABEL_H = 20;
+
+/** A stop as the globe uses it: a story stop, or a dispatch place that has no stop of its own. */
+type TourStop = {
+  key: string;
+  placeKey: string; // PlaceId, or a "between-…" dateline key
+  era: "1937" | "2026";
+  title: string;
+  short: string;
+  facts: FactId[];
+  zoom: number;
+  lon: number;
+  lat: number;
+};
+const STORY_STOPS: TourStop[] = STOPS.map((s) => ({
+  key: s.key,
+  placeKey: s.id,
+  era: s.era,
+  title: s.title,
+  short: PLACES[s.id].short,
+  facts: s.facts,
+  zoom: s.zoom,
+  lon: PLACES[s.id].lon,
+  lat: PLACES[s.id].lat,
+}));
 
 // Deterministic stars (seeded LCG, so the sky doesn't reshuffle between renders).
 const STARS = (() => {
@@ -88,7 +117,6 @@ function prefersReducedMotion() {
 
 const clampZoom = (z: number) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z));
 const clampLat = (l: number) => Math.max(-80, Math.min(80, l));
-const viewFor = (id: PlaceId, zoom: number): View => ({ lon: -PLACES[id].lon, lat: -PLACES[id].lat, zoom });
 
 function makeProjection(v: View, clip: boolean) {
   const p = geoOrthographic().scale(R * v.zoom).translate([SIZE / 2, SIZE / 2]).rotate([v.lon, v.lat]).clipAngle(90).precision(0.3);
@@ -107,13 +135,22 @@ const distance = (pts: Pt[]) => (pts.length > 1 ? Math.hypot(pts[0].x - pts[1].x
 
 const HALO = { stroke: "#0B1F33", strokeWidth: 4, paintOrder: "stroke" } as const;
 
-function legLabel(id: PlaceId): string | null {
+/** Where a place's dispatch pin sits: on the side away from the stop's label, so it never covers the dot. */
+function pinPoint(key: string, lonlat: [number, number], proj: (p: [number, number]) => [number, number] | null, zoom: number): [number, number] | null {
+  const p = proj(lonlat);
+  if (!p) return null;
+  if (key.startsWith("between-")) return [p[0], p[1] - 18];
+  const left = key === "purdue" || key === "howland" || (key === "nikumaroro" && zoom < 2);
+  return [p[0] + (left ? -18 : 18), p[1] - 16];
+}
+
+function legLabel(id: string): string | null {
   const leg = LEGS_2026.find((l) => l.from === id);
   if (!leg) return null;
   return `${leg.by === "air" ? "Flight" : "Sea"} leg: ${PLACES[leg.from].short} → ${PLACES[leg.to].short}`;
 }
 
-export default function JourneyGlobe({ phase }: { phase: Phase }) {
+export default function JourneyGlobe({ phase, pins }: { phase: Phase; pins: DispatchPin[] }) {
   const [view, setView] = useState<View>(() => (prefersReducedMotion() ? HOME : START));
   const [land50, setLand50] = useState<Land | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -129,11 +166,19 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
   const gesture = useRef({ down: { x: 0, y: 0 }, moved: 0, multi: false });
   const frame = useRef<number | null>(null);
   const requested50 = useRef(false);
+  const replayRaf = useRef<number | null>(null);
+  const [replay, setReplay] = useState<{ pos: [number, number]; index: number } | null>(null);
 
   const commit = useCallback((v: View, setGoal = true) => {
     viewRef.current = v;
     if (setGoal) goal.current = v;
     setView(v);
+  }, []);
+
+  const cancelReplay = useCallback(() => {
+    if (replayRaf.current) cancelAnimationFrame(replayRaf.current);
+    replayRaf.current = null;
+    setReplay(null);
   }, []);
 
   const stopAnim = () => {
@@ -166,7 +211,10 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
   // First view: swing from the US over to Nikumaroro.
   useEffect(() => {
     if (!prefersReducedMotion()) flyTo(HOME, 2200);
-    return stopAnim;
+    return () => {
+      stopAnim();
+      if (replayRaf.current) cancelAnimationFrame(replayRaf.current);
+    };
   }, [flyTo]);
 
   // Load the detailed coastline only once someone zooms in.
@@ -189,12 +237,13 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
       if (!e.ctrlKey) return;
       e.preventDefault();
       stopAnim();
+      cancelReplay();
       const v = viewRef.current;
       commit({ ...v, zoom: clampZoom(v.zoom * Math.exp(-e.deltaY * 0.01)) });
     };
     svg.addEventListener("wheel", onWheel, { passive: false });
     return () => svg.removeEventListener("wheel", onWheel);
-  }, [commit]);
+  }, [commit, cancelReplay]);
 
   const geo = useMemo(() => {
     const v: View = { lon: view.lon, lat: view.lat, zoom: view.zoom };
@@ -203,6 +252,7 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
     const land = view.zoom >= DETAIL_ZOOM && land50 ? land50 : LAND_110;
     return {
       proj,
+      path,
       sphere: geoPath(proj)({ type: "Sphere" }) ?? "",
       graticule: path(view.zoom >= FINE_GRATICULE_ZOOM ? GRATICULE_FINE : GRATICULE) ?? "",
       land: path(land) ?? "",
@@ -211,7 +261,7 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
       legs2026: LEGS_2026.map((l) => path(line(l.from, l.to)) ?? ""),
     };
   }, [view.lon, view.lat, view.zoom, land50]);
-  const { proj } = geo;
+  const { proj, path: pathClip } = geo;
 
   const night = useMemo(() => {
     if (minute === null) return "";
@@ -223,13 +273,81 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
   const { done, active } = legProgress(phase);
   const team = teamLocation(phase);
   const zoom = view.zoom;
-  const selectedStop = STOPS.find((s) => s.key === selected) ?? null;
-  const selectedIndex = selectedStop ? STOPS.indexOf(selectedStop) : -1;
 
-  const selectStop = (stop: Stop) => {
+  // Dispatches by place (newest first), the ship's track, and any at-sea stops that have a dispatch.
+  const byPlace = useMemo(() => {
+    const m = new Map<string, DispatchPin[]>();
+    for (const p of [...pins].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt))) {
+      m.set(p.place.key, [...(m.get(p.place.key) ?? []), p]);
+    }
+    return m;
+  }, [pins]);
+  const track = useMemo(() => voyageTrack(pins), [pins]);
+  const stops = useMemo(() => {
+    const atSea: TourStop[] = [];
+    for (const step of track) {
+      if (!step.key.startsWith("between-") || atSea.some((s) => s.key === step.key)) continue;
+      const place = byPlace.get(step.key)![0].place;
+      atSea.push({ key: step.key, placeKey: step.key, era: "2026", title: place.label, short: "Halfway", facts: [], zoom: 4, lon: place.lon, lat: place.lat });
+    }
+    const i = STORY_STOPS.findIndex((s) => s.key === "niku-2026");
+    return [...STORY_STOPS.slice(0, i), ...atSea, ...STORY_STOPS.slice(i)];
+  }, [track, byPlace]);
+
+  const selectedStop = stops.find((s) => s.key === selected) ?? null;
+  const selectedIndex = selectedStop ? stops.indexOf(selectedStop) : -1;
+
+  const selectStop = (stop: TourStop) => {
+    cancelReplay();
     setSelected(stop.key);
-    flyTo(viewFor(stop.id, stop.zoom), 1400);
+    flyTo({ lon: -stop.lon, lat: -stop.lat, zoom: stop.zoom }, 1400);
   };
+
+  const resetView = () => {
+    cancelReplay();
+    setSelected(null);
+    flyTo(HOME, 1000);
+  };
+
+  const shipAt = replay?.pos ?? (track.length ? ([track.at(-1)!.lon, track.at(-1)!.lat] as [number, number]) : null);
+  const replayStep = replay ? track[replay.index] : null;
+  const canReplay = track.length >= 2;
+
+  // Fly to frame the Tarawa → Nikumaroro leg, then move the ship stop to stop (positions are dispatch datelines only).
+  const startReplay = () => {
+    if (!canReplay) return;
+    cancelReplay();
+    const last = track.length - 1;
+    const pt = (i: number): [number, number] => [track[i].lon, track[i].lat];
+    const mid = geoInterpolate(coords("tarawa"), coords("nikumaroro"))(0.5);
+    flyTo({ lon: -mid[0], lat: -mid[1], zoom: 4 }, 1400);
+    if (prefersReducedMotion()) {
+      setReplay({ pos: pt(last), index: last });
+      return;
+    }
+    setReplay({ pos: pt(0), index: 0 });
+    const LEAD = 1400;
+    const SEGMENT = 1500;
+    const t0 = performance.now();
+    const step = (t: number) => {
+      const el = t - t0 - LEAD;
+      if (el < 0) {
+        replayRaf.current = requestAnimationFrame(step);
+        return;
+      }
+      const s = Math.min(last - 1, Math.floor(el / SEGMENT));
+      const k = Math.min(1, (el - s * SEGMENT) / SEGMENT);
+      const e = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+      const finished = el >= last * SEGMENT;
+      setReplay({ pos: finished ? pt(last) : geoInterpolate(pt(s), pt(s + 1))(e), index: finished ? last : s + (k >= 1 ? 1 : 0) });
+      replayRaf.current = finished ? null : requestAnimationFrame(step);
+    };
+    replayRaf.current = requestAnimationFrame(step);
+  };
+
+  // Ship track drawn so far: every dispatch position, or up to the ship while replaying.
+  const travelled: [number, number][] = track.map((t) => [t.lon, t.lat]);
+  if (replay && replay.index < track.length - 1) travelled.splice(replay.index + 1, track.length, replay.pos);
 
   // --- pointer gestures ---
   const rebaseline = () => {
@@ -253,6 +371,7 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
 
   const onDown = (e: React.PointerEvent<SVGSVGElement>) => {
     stopAnim();
+    cancelReplay();
     goal.current = viewRef.current;
     e.currentTarget.setPointerCapture(e.pointerId);
     if (pointers.current.size === 0) gesture.current = { down: { x: e.clientX, y: e.clientY }, moved: 0, multi: false };
@@ -269,23 +388,27 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
     if (frame.current === null) frame.current = requestAnimationFrame(applyGesture);
   };
 
-  const hitTest = (clientX: number, clientY: number): Stop | null => {
+  const hitTest = (clientX: number, clientY: number): TourStop | null => {
     const svg = svgRef.current;
     if (!svg) return null;
     const rect = svg.getBoundingClientRect();
     const u = rect.width / SIZE;
     const v = viewRef.current;
     const p = makeProjection(v, false);
-    let best: { id: PlaceId; d: number } | null = null;
-    for (const id of PLACE_IDS) {
-      if (!isVisible(id, v)) continue;
-      const pt = p(coords(id));
-      if (!pt) continue;
-      const d = Math.hypot(pt[0] * u + rect.left - clientX, pt[1] * u + rect.top - clientY);
-      if (d <= TAP_RADIUS && (!best || d < best.d)) best = { id, d };
+    let best: { stop: TourStop; d: number } | null = null;
+    const consider = (stop: TourStop, at: [number, number] | null) => {
+      if (!at) return;
+      const d = Math.hypot(at[0] * u + rect.left - clientX, at[1] * u + rect.top - clientY);
+      if (d <= TAP_RADIUS && (!best || d < best.d)) best = { stop, d };
+    };
+    for (const stop of stops) {
+      if (stop.era === "1937" && stop.placeKey === "nikumaroro") continue; // the 2026 stop owns Nikumaroro taps
+      const lonlat: [number, number] = [stop.lon, stop.lat];
+      if (!pointVisible(lonlat, v)) continue;
+      consider(stop, p(lonlat));
+      if (byPlace.has(stop.placeKey)) consider(stop, pinPoint(stop.placeKey, lonlat, p, v.zoom));
     }
-    if (!best) return null;
-    return best.id === "nikumaroro" ? NIKU_2026 : (STOPS.find((s) => s.id === best.id) ?? null);
+    return (best as { stop: TourStop } | null)?.stop ?? null;
   };
 
   const onUp = (e: React.PointerEvent<SVGSVGElement>) => {
@@ -300,13 +423,13 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
   };
 
   const zoomBy = (factor: number) => {
+    cancelReplay();
     const g = goal.current;
     flyTo({ ...g, zoom: clampZoom(g.zoom * factor) }, 350);
   };
 
   // --- drawing ---
   const showAllLabels = zoom >= 2;
-  const selectedPlace = selectedStop?.id;
 
   const text = (x: number, y: number, s: string, o: { anchor?: "start" | "middle" | "end"; mono?: boolean; italic?: boolean; opacity?: number; fill?: string } = {}) => (
     <text
@@ -325,45 +448,99 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
     </text>
   );
 
-  const labelFor = (id: PlaceId): { dx: number; dy: number; anchor: "start" | "end" } | null => {
-    if (id === "howland") return { dx: 9, dy: -6, anchor: "start" };
-    if (id === "nikumaroro") return showAllLabels ? { dx: -10, dy: 5, anchor: "end" } : { dx: 10, dy: 20, anchor: "start" };
-    if (!showAllLabels) return null;
-    if (id === "purdue") return { dx: 9, dy: 5, anchor: "start" };
+  // Text boxes already on the globe this frame, so captions can step aside instead of overprinting.
+  const boxes: { x0: number; x1: number; y0: number; y1: number }[] = [];
+  const claim = (x: number, y: number, label: string, anchor: "start" | "middle" | "end", force = false) => {
+    const w = label.length * 10.5;
+    const x0 = anchor === "start" ? x : anchor === "end" ? x - w : x - w / 2;
+    const box = { x0, x1: x0 + w, y0: y - LABEL_H + 4, y1: y + 4 };
+    if (!force && boxes.some((o) => box.x0 < o.x1 && box.x1 > o.x0 && box.y0 < o.y1 && box.y1 > o.y0)) return false;
+    boxes.push(box);
+    return true;
+  };
+
+  const labelFor = (key: string): { dx: number; dy: number; anchor: "start" | "end" } | null => {
+    if (key === "howland") return { dx: 9, dy: -6, anchor: "start" };
+    if (key === "nikumaroro") return showAllLabels ? { dx: -10, dy: 5, anchor: "end" } : { dx: 10, dy: 20, anchor: "start" };
+    if (key.startsWith("between-") || !showAllLabels) return null;
+    if (key === "purdue") return { dx: 9, dy: 5, anchor: "start" };
     return { dx: -9, dy: 5, anchor: "end" }; // lae, lax, nadi, tarawa
   };
 
-  const marker = (id: PlaceId, tone: "signal" | "amber") => {
-    if (!isVisible(id, view)) return null;
-    const p = proj(coords(id));
+  const markerStops = stops.filter((st, i) => !(st.era === "1937" && st.placeKey === "nikumaroro") && stops.findIndex((o) => o.placeKey === st.placeKey && !(o.era === "1937" && o.placeKey === "nikumaroro")) === i);
+  const marker = (stop: TourStop) => {
+    const lonlat: [number, number] = [stop.lon, stop.lat];
+    if (!pointVisible(lonlat, view)) return null;
+    const p = proj(lonlat);
     if (!p) return null;
-    const lab = labelFor(id);
+    const lab = labelFor(stop.placeKey);
+    const amber = stop.placeKey === "lae" || stop.placeKey === "howland";
+    if (lab) claim(p[0] + lab.dx, p[1] + lab.dy, stop.short, lab.anchor, true);
     return (
-      <g key={id}>
-        {selectedPlace === id && <circle cx={p[0]} cy={p[1]} r="12" fill="none" stroke="#fff" strokeWidth="3" />}
-        <circle cx={p[0]} cy={p[1]} r={lab ? 5.5 : 4} fill={tone === "signal" ? "#E8692C" : "#D9A441"} stroke="#0B1F33" strokeWidth="2" />
-        {lab && text(p[0] + lab.dx, p[1] + lab.dy, PLACES[id].short, { anchor: lab.anchor })}
+      <g key={stop.placeKey}>
+        <circle cx={p[0]} cy={p[1]} r={lab ? 5.5 : 4} fill={amber ? "#D9A441" : "#E8692C"} stroke="#0B1F33" strokeWidth="2" />
+        {lab && text(p[0] + lab.dx, p[1] + lab.dy, stop.short, { anchor: lab.anchor })}
       </g>
     );
   };
 
-  const caption = (a: PlaceId, b: PlaceId, s: string, minZoom: number, anchor: "middle" | "end" = "middle") => {
+  const pin = (stop: TourStop) => {
+    const list = byPlace.get(stop.placeKey);
+    if (!list) return null;
+    const lonlat: [number, number] = [stop.lon, stop.lat];
+    if (!pointVisible(lonlat, view)) return null;
+    const at = pinPoint(stop.placeKey, lonlat, proj, zoom);
+    if (!at) return null;
+    boxes.push({ x0: at[0] - 12, x1: at[0] + 12, y0: at[1] - 12, y1: at[1] + 12 });
+    return (
+      <g key={`pin-${stop.placeKey}`}>
+        <rect x={at[0] - 12} y={at[1] - 12} width="24" height="24" rx="6" fill="#fff" stroke="#0B1F33" strokeWidth="2" />
+        <text x={at[0]} y={at[1] + 6} textAnchor="middle" fontSize="17" fontWeight="700" fontFamily="var(--font-mono)" fill="#0B1F33">
+          {list.length}
+        </text>
+      </g>
+    );
+  };
+
+  const caption = (a: PlaceId, b: PlaceId, s: string, minZoom: number, where: "above" | "right" | "below") => {
     if (zoom < minZoom) return null;
     const m = geoInterpolate(coords(a), coords(b))(0.5);
     if (!pointVisible(m, view)) return null;
     const p = proj(m);
     if (!p) return null;
-    return text(p[0] + (anchor === "end" ? -8 : 0), p[1] - 14, s, { anchor, mono: true, fill: "#E9DBBB" });
+    const anchor = where === "right" ? "start" : "middle";
+    const x = p[0] + (where === "right" ? 10 : 0);
+    const y = p[1] + (where === "above" ? -14 : where === "below" ? 22 : 5);
+    if (!claim(x, y, s, anchor)) return null;
+    return text(x, y, s, { anchor, mono: true, fill: "#E9DBBB" });
   };
 
   const howland = zoom >= 4 && isVisible("howland", view) ? proj(coords("howland")) : null;
   const phoenix = zoom >= 4 && pointVisible([-172, -3.5], view) ? proj([-172, -3.5]) : null;
   const teamPt = team && pointVisible(team, view) ? proj(team) : null;
+  const shipPt = shipAt && pointVisible(shipAt, view) ? proj(shipAt) : null;
+  const travelPath = travelled.length > 1 ? (pathClip({ type: "LineString", coordinates: travelled }) ?? "") : "";
+  // Itasca sits just above Howland, its label left of the glyph (Howland's own label is to the right).
+  if (howland) claim(howland[0] - 12, howland[1] - 15, "Itasca", "end", true);
+  // The ship label is centred under the glyph, nudged to stay inside the frame; it outranks "Phoenix Islands".
+  const SHIP_LABEL = "Marin Mainiku";
+  const shipHalf = (SHIP_LABEL.length * 10.5) / 2 + 2;
+  const shipLabel =
+    zoom >= 3 && shipPt ? { x: Math.max(shipHalf, Math.min(SIZE - shipHalf, shipPt[0])), y: shipPt[1] + 38 } : null;
+  if (shipLabel) claim(shipLabel.x, shipLabel.y, SHIP_LABEL, "middle", true);
+  const showPhoenix = phoenix ? claim(phoenix[0], phoenix[1], "Phoenix Islands", "start") : false;
 
   const atmosphere = zoom <= 1.2;
-  const btn = "min-h-12 rounded-full bg-foam/10 px-6 text-[1.05rem] font-semibold text-foam ring-1 ring-foam/20 hover:bg-foam/20 disabled:opacity-40 disabled:hover:bg-foam/10";
+  const btn = "min-h-12 whitespace-nowrap rounded-full bg-foam/10 px-6 text-[1.05rem] font-semibold text-foam ring-1 ring-foam/20 hover:bg-foam/20 disabled:opacity-40 disabled:hover:bg-foam/10";
   const round = "grid size-12 shrink-0 place-items-center rounded-full bg-foam/10 text-[1.6rem] leading-none font-semibold text-foam ring-1 ring-foam/20 hover:bg-foam/20 disabled:opacity-40 disabled:hover:bg-foam/10";
-  const legText = selectedStop?.era === "2026" ? legLabel(selectedStop.id) : null;
+  const voyageStop = selectedStop?.era === "2026" && (selectedStop.placeKey === "tarawa" || selectedStop.placeKey === "nikumaroro" || selectedStop.placeKey.startsWith("between-"));
+  const replayButton =
+    canReplay && (!selectedStop || voyageStop) ? (
+      <button type="button" className={`${btn} w-full`} onClick={startReplay}>
+        ⛴ Replay the voyage
+      </button>
+    ) : null;
+  const legText = selectedStop?.era === "2026" ? legLabel(selectedStop.placeKey) : null;
 
   return (
     <div>
@@ -427,33 +604,47 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
           );
         })}
 
-        {phoenix && text(phoenix[0], phoenix[1], "Phoenix Islands", { italic: true, opacity: 0.6 })}
+        {phoenix && showPhoenix && text(phoenix[0], phoenix[1], "Phoenix Islands", { italic: true, opacity: 0.6 })}
 
-        {marker("lae", "amber")}
-        {marker("purdue", "signal")}
-        {marker("lax", "signal")}
-        {marker("nadi", "signal")}
-        {marker("tarawa", "signal")}
-        {marker("howland", "amber")}
-        {marker("nikumaroro", "signal")}
+        {travelPath && <path d={travelPath} fill="none" stroke="#E8692C" strokeWidth="3.5" strokeLinecap="round" />}
+
+        {selectedStop && pointVisible([selectedStop.lon, selectedStop.lat], view) && (
+          <circle
+            cx={proj([selectedStop.lon, selectedStop.lat])?.[0]}
+            cy={proj([selectedStop.lon, selectedStop.lat])?.[1]}
+            r="12"
+            fill="none"
+            stroke="#fff"
+            strokeWidth="3"
+          />
+        )}
+        {markerStops.map(marker)}
 
         {howland && (
           <g aria-hidden="true">
             <path
-              transform={`translate(${howland[0] - 40} ${howland[1] - 9})`}
+              transform={`translate(${howland[0]} ${howland[1] - 20})`}
               d="M-8 0h16l-3.5 6h-9zM-2 0v-6h5v6M3-4l7-1"
               fill="#D9A441"
               stroke="#D9A441"
               strokeWidth="1.2"
               strokeLinejoin="round"
             />
-            {text(howland[0] - 54, howland[1] - 3, "Itasca", { anchor: "end" })}
+            {text(howland[0] - 12, howland[1] - 15, "Itasca", { anchor: "end" })}
           </g>
         )}
 
-        {caption(LEG_1937.from, LEG_1937.to, "2,556 mi", 2)}
-        {caption(SPUR_1937.from, SPUR_1937.to, "≈400 mi", 3, "end")}
-        {caption("tarawa", "nikumaroro", "830 nm", 2)}
+        {shipPt && (
+          <g>
+            <path transform={`translate(${shipPt[0]} ${shipPt[1] + 14})`} d={SHIP_D} fill="#E8692C" stroke="#0B1F33" strokeWidth="3" strokeLinejoin="round" paintOrder="stroke" />
+            {shipLabel && text(shipLabel.x, shipLabel.y, SHIP_LABEL, { anchor: "middle" })}
+          </g>
+        )}
+        {markerStops.map(pin)}
+
+        {caption(LEG_1937.from, LEG_1937.to, "2,556 mi", 2, "above")}
+        {caption(SPUR_1937.from, SPUR_1937.to, "≈400 mi", 3, "right")}
+        {caption("tarawa", "nikumaroro", "830 nm", 2, "below")}
 
         {teamPt && (
           <g transform={`translate(${teamPt[0]} ${teamPt[1]})`}>
@@ -467,12 +658,24 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
         <button type="button" aria-label="Zoom out" className={round} disabled={view.zoom <= MIN_ZOOM + 0.01} onClick={() => zoomBy(1 / BUTTON_ZOOM)}>
           −
         </button>
-        <button type="button" className={btn} onClick={() => flyTo(HOME, 1000)}>
+        <button type="button" className={btn} onClick={resetView}>
           Reset view
         </button>
         <button type="button" aria-label="Zoom in" className={round} disabled={view.zoom >= MAX_ZOOM - 0.01} onClick={() => zoomBy(BUTTON_ZOOM)}>
           +
         </button>
+      </div>
+
+      <div aria-live="polite">
+        {replayStep && (
+          <p className="mt-4 rounded-[var(--radius-card)] bg-navy-2/80 px-4 py-3 ring-1 ring-foam/10">
+            <span className="font-mono font-semibold text-signal">{formatShortDate(new Date(replayStep.publishedAt), "America/Toronto")}</span>
+            {" · "}
+            <Link href={`/dispatch/${replayStep.slug}`} className="text-amber underline">
+              {replayStep.title}
+            </Link>
+          </p>
+        )}
       </div>
 
       <div aria-live="polite" className="mt-4">
@@ -495,24 +698,41 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
                 <FactText key={id} id={id} tone="dark" />
               ))}
             </div>
+            {selectedStop.era === "2026" && byPlace.has(selectedStop.placeKey) && (
+              <div className="mt-4">
+                <p className="font-mono font-semibold text-foam-muted">Dispatches written here</p>
+                <ul className="mt-2 space-y-2">
+                  {byPlace.get(selectedStop.placeKey)!.map((d) => (
+                    <li key={d.slug}>
+                      <Link href={`/dispatch/${d.slug}`} className="text-amber underline">
+                        {d.title}
+                      </Link>{" "}
+                      <span className="font-mono text-foam-muted">{formatShortDate(new Date(d.publishedAt), "America/Toronto")}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {replayButton && <div className="mt-4">{replayButton}</div>}
             <div className="mt-4 flex gap-3">
-              <button type="button" className={`${btn} flex-1`} disabled={selectedIndex <= 0} onClick={() => selectStop(STOPS[selectedIndex - 1])}>
-                ← Previous
+              <button type="button" className={`${btn} flex-1`} disabled={selectedIndex <= 0} onClick={() => selectStop(stops[selectedIndex - 1])}>
+                ← Back
               </button>
-              <button type="button" className={`${btn} flex-1`} disabled={selectedIndex >= STOPS.length - 1} onClick={() => selectStop(STOPS[selectedIndex + 1])}>
-                Next stop →
+              <button type="button" className={`${btn} flex-1`} disabled={selectedIndex >= stops.length - 1} onClick={() => selectStop(stops[selectedIndex + 1])}>
+                Next →
               </button>
             </div>
           </div>
         ) : (
-          <button type="button" className="min-h-12 w-full rounded-full bg-amber px-6 text-[1.05rem] font-semibold text-navy hover:brightness-110" onClick={() => selectStop(STOPS[0])}>
+          <button type="button" className="min-h-12 w-full rounded-full bg-amber px-6 text-[1.05rem] font-semibold text-navy hover:brightness-110" onClick={() => selectStop(stops[0])}>
             ▶ Take the tour
           </button>
         )}
+        {!selectedStop && replayButton && <div className="mt-3">{replayButton}</div>}
       </div>
 
       <div className="snap-track -mx-5 mt-4 flex gap-2 overflow-x-auto px-5 pb-2 sm:mx-0 sm:px-0">
-        {STOPS.map((s) => (
+        {stops.map((s) => (
           <button
             key={s.key}
             type="button"
@@ -522,7 +742,7 @@ export default function JourneyGlobe({ phase }: { phase: Phase }) {
               selected === s.key ? "bg-foam text-navy ring-foam" : "bg-foam/10 text-foam ring-foam/20 hover:bg-foam/20"
             }`}
           >
-            {PLACES[s.id].short}
+            {s.short}
             <span className={`font-mono text-[1rem] font-medium ${selected === s.key ? "text-navy/70" : s.era === "1937" ? "text-amber" : "text-signal"}`}>{s.era}</span>
           </button>
         ))}

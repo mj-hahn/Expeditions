@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
+import type { DispatchPin } from "@/lib/dateline-place";
 import type { Phase } from "@/lib/types";
 
 // d3 + map data load only when the globe scrolls into view (SPEC §9 performance).
@@ -16,7 +17,7 @@ function GlobePlaceholder() {
   );
 }
 
-export function GlobeLoader({ phase }: { phase: Phase }) {
+export function GlobeLoader({ phase, pins }: { phase: Phase; pins: DispatchPin[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const [show, setShow] = useState(false);
 
@@ -36,5 +37,5 @@ export function GlobeLoader({ phase }: { phase: Phase }) {
     return () => io.disconnect();
   }, []);
 
-  return <div ref={ref}>{show ? <JourneyGlobe phase={phase} /> : <GlobePlaceholder />}</div>;
+  return <div ref={ref}>{show ? <JourneyGlobe phase={phase} pins={pins} /> : <GlobePlaceholder />}</div>;
 }
