@@ -15,6 +15,7 @@ import { SkepticsCorner } from "@/components/SkepticsCorner";
 import { StatusHero } from "@/components/StatusHero";
 import { StayInTheLoop } from "@/components/StayInTheLoop";
 import { getConditions } from "@/lib/conditions";
+import { dispatchPins } from "@/lib/dateline-place";
 import { getDispatches } from "@/lib/dispatches";
 import { getNews, getVideos } from "@/lib/news";
 import { getStatus } from "@/lib/status";
@@ -37,7 +38,7 @@ export default async function Home() {
         <NewsSection news={news} videos={videos} />
         <RightNow conditions={conditions} />
         <SearchProgress status={status} tide={conditions.marine?.tide ?? null} />
-        <JourneyMap phase={status.phase} />
+        <JourneyMap phase={status.phase} pins={dispatchPins(dispatches)} />
         <DispatchTimeline dispatches={dispatches} />
         <ExploreMore dispatches={dispatches} />
         <Mystery />
