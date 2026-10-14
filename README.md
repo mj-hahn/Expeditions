@@ -1,4 +1,4 @@
-# Taraia Watch
+# Luisa's Lookout
 
 Phone-first tracker for the 2026 Taraia Object Expedition. `SPEC.md` is the source of truth.
 

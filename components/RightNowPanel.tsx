@@ -96,8 +96,8 @@ export function RightNowPanel({ conditions }: { conditions: Conditions }) {
       )}
 
       {(weather || marine) && (
-        <p className="text-foam-muted">
-          <a href={site.openMeteoUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-amber underline">
+        <p className="text-[0.75rem] text-foam-muted">
+          <a href={site.openMeteoUrl} target="_blank" rel="noopener noreferrer" className="underline decoration-foam-muted/50">
             Weather data by Open-Meteo.com
           </a>
         </p>
