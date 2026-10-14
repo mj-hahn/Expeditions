@@ -10,14 +10,21 @@ import { formatShortDate } from "@/lib/time";
 import type { Dispatch, Status } from "@/lib/types";
 
 export function StatusHero({ status, latest, recent = [] }: { status: Status; latest?: Dispatch; recent?: Dispatch[] }) {
+  // "Luisa’s Lookout" → "Luisa’s" + gold "Lookout".
+  const cut = site.name.lastIndexOf(" ");
+  const first = cut > 0 ? site.name.slice(0, cut) : site.name;
+  const last = cut > 0 ? site.name.slice(cut + 1) : "";
   return (
     <section aria-labelledby="status-heading" className="chart-grid relative overflow-hidden text-foam">
       <HeroSky />
-      <AtollMark className="pointer-events-none absolute -top-10 -right-14 size-56 text-foam opacity-60 sm:size-72" />
+      <AtollMark className="pointer-events-none absolute top-40 -right-16 size-48 text-foam opacity-30 sm:top-12 sm:-right-10 sm:size-64" />
       <div className="relative mx-auto max-w-[720px] px-5 pt-[max(1.5rem,env(safe-area-inset-top))] pb-10 sm:px-8 sm:pt-10">
-        <div className="pr-28">
-          <p className="font-display text-[1.35rem] font-semibold tracking-tight">{site.name}</p>
-          <p className="text-[1rem] text-foam-muted">{site.dedication}</p>
+        <div>
+          <p className="font-display text-[2.6rem] leading-[1.05] font-semibold tracking-tight text-foam sm:text-[3.2rem]">
+            {first} <span className="text-amber">{last}</span>
+          </p>
+          <span aria-hidden="true" className="mt-3 block h-1 w-16 rounded-full bg-amber" />
+          <p className="mt-3 pr-16 text-[1rem] text-foam-muted">{site.dedication}</p>
         </div>
 
         <p className="mt-8 font-mono text-[1rem] text-foam-muted">
@@ -30,16 +37,19 @@ export function StatusHero({ status, latest, recent = [] }: { status: Status; la
 
         <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
           <VerdictPill verdict={status.verdict} size="lg" />
-          {latest && (
-            <p className="text-[1rem] text-foam-muted">
-              Last update:{" "}
-              <RelativeTime
-                iso={latest.publishedAt.toISOString()}
-                fallback={formatShortDate(latest.publishedAt)}
-              />
-            </p>
-          )}
         </div>
+
+        {latest && (
+          <div className="mt-5">
+            <p className="text-foam">
+              Latest dispatch from Purdue:{" "}
+              <strong className="font-semibold">
+                <RelativeTime iso={latest.publishedAt.toISOString()} fallback={formatShortDate(latest.publishedAt)} />
+              </strong>
+            </p>
+            <p className="text-foam-muted">This page checks for new dispatches every 10 minutes.</p>
+          </div>
+        )}
 
         <SinceLastVisit
           items={recent.map((d) => ({ slug: d.slug, title: shortTitle(d.title), publishedAt: d.publishedAt.toISOString() }))}
