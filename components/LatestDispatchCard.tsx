@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { DispatchTimes } from "@/components/DispatchTimes";
-import { Img } from "@/components/Img";
 import { NewBadge } from "@/components/NewBadge";
 import { SectionHeading } from "@/components/SectionHeading";
+import { ZoomablePhoto } from "@/components/ZoomablePhoto";
 import type { Dispatch } from "@/lib/types";
 
 export function LatestDispatchCard({ dispatch }: { dispatch: Dispatch }) {
@@ -12,14 +12,13 @@ export function LatestDispatchCard({ dispatch }: { dispatch: Dispatch }) {
       <SectionHeading kicker="Latest dispatch" title="Word from the island" id="latest-heading" />
       <article className="paper overflow-hidden rounded-[var(--radius-card)] shadow-[0_1px_0_var(--color-rule),0_12px_30px_-18px_rgb(11_31_51/0.45)] ring-1 ring-rule">
         {photo && (
-          <div className="aspect-[3/2] w-full overflow-hidden bg-sand-2">
-            <Img
-              photo={photo}
-              eager
-              sizes="(min-width: 760px) 720px, 100vw"
-              className="h-full w-full object-cover"
-            />
-          </div>
+          <ZoomablePhoto
+            photo={photo}
+            more={dispatch.photos}
+            eager
+            sizes="(min-width: 760px) 720px, 100vw"
+            className="aspect-[3/2]"
+          />
         )}
         <div className="p-5 sm:p-7">
           <div className="flex flex-wrap items-center gap-3">
