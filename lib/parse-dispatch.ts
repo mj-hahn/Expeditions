@@ -110,9 +110,19 @@ function stripBoilerplate($: $): void {
     if (clean(el.text()).toLowerCase() !== "related coverage") return;
     const tag = (el.prop("tagName") ?? "").toLowerCase();
     if (tag === "strong") return; // handled via its paragraph
-    const next = el.next();
-    if (next.length && /^(ul|ol|div|section|nav|aside)$/i.test(next.prop("tagName") ?? "")) {
+    // Purdue follows the heading with a list, or with paragraphs that hold
+    // nothing but a link to another story. Drop those, then stop.
+    let next = el.next();
+    while (next.length) {
+      const nextTag = (next.prop("tagName") ?? "").toLowerCase();
+      const isLinkOnly =
+        nextTag === "p" &&
+        next.find("a").length > 0 &&
+        clean(next.text()) === clean(next.find("a").text());
+      if (!/^(ul|ol|nav|aside)$/.test(nextTag) && !isLinkOnly) break;
+      const after = next.next();
       next.remove();
+      next = after;
     }
     el.remove();
   });

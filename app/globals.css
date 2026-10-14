@@ -72,9 +72,12 @@ a {
   border-radius: 6px;
 }
 
-img {
-  max-width: 100%;
-  height: auto;
+@layer base {
+  /* In the base layer so Tailwind utilities like h-full can override it. */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 /* Paper grain for logbook surfaces; pure CSS, no image request. */

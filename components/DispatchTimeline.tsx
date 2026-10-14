@@ -3,6 +3,7 @@ import { Img } from "@/components/Img";
 import { NewBadge } from "@/components/NewBadge";
 import { SectionHeading } from "@/components/SectionHeading";
 import { site } from "@/content/site";
+import { shortTitle } from "@/lib/purdue";
 import { formatDispatchTimes } from "@/lib/time";
 import type { Dispatch } from "@/lib/types";
 
@@ -44,9 +45,13 @@ export function DispatchTimeline({ dispatches }: { dispatches: Dispatch[] }) {
                     <time dateTime={d.publishedAt.toISOString()} className="font-mono text-[1rem] font-semibold text-teal-ink">
                       {t.home}
                     </time>
-                    {isBackground && (
-                      <span className="rounded-full bg-sand-2 px-2.5 py-0.5 text-[1rem] text-ink-muted">Background</span>
-                    )}
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-[1rem] ${
+                        isBackground ? "bg-sand-2 text-ink-muted" : "bg-teal/10 text-teal-ink"
+                      }`}
+                    >
+                      {isBackground ? "Background" : "Expedition update"}
+                    </span>
                     <NewBadge iso={d.publishedAt.toISOString()} />
                   </div>
                   <div className="mt-2 flex gap-4">
@@ -56,7 +61,7 @@ export function DispatchTimeline({ dispatches }: { dispatches: Dispatch[] }) {
                           isBackground ? "text-ink-muted" : "text-navy"
                         }`}
                       >
-                        {d.title}
+                        {d.kind === "dispatch" ? shortTitle(d.title) : d.title}
                       </h3>
                     </div>
                     {photo && (

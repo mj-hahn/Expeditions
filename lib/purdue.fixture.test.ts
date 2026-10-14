@@ -28,6 +28,34 @@ describe.skipIf(!exists)("purdue-posts.json fixture", () => {
     expect(parseWpDate(p.date_gmt).toISOString()).toBe("2026-10-12T14:16:09.000Z");
   });
 
+  it("strips Related coverage links from the Oct 2 dispatch", () => {
+    const p = kept.find((k) => k.id === 23872)!;
+    const r = parseDispatchContent(p.content.rendered, p.excerpt.rendered);
+    const texts = r.blocks.flatMap((b) => (b.type === "paragraph" ? [b.text] : []));
+    expect(texts.some((t) => t.startsWith("1 week out"))).toBe(false);
+    expect(texts.some((t) => t.startsWith("For those following the expedition"))).toBe(true);
+  });
+
+  it("extracts datelines, carousels and figure captions from real markup", () => {
+    const byId = (id: number) => {
+      const p = kept.find((k) => k.id === id)!;
+      return parseDispatchContent(p.content.rendered, p.excerpt.rendered);
+    };
+    expect(byId(24243).dateline).toBe("NIKUMARORO, Kiribati");
+    expect(byId(23872).dateline).toBe("WEST LAFAYETTE, Ind.");
+    const gallery = byId(24243).blocks.find((b) => b.type === "gallery");
+    expect(gallery && gallery.type === "gallery" && gallery.photos.length).toBe(5);
+    expect(gallery && gallery.type === "gallery" && gallery.photos.every((ph) => ph.caption)).toBe(true);
+    const fig = byId(24243).blocks.find((b) => b.type === "figure");
+    expect(fig && fig.type === "figure" && fig.photo.caption).toMatch(/Howland Island/);
+    expect(byId(24243).blocks.some((b) => b.type === "paragraph" && b.isQuote)).toBe(true);
+  });
+
+  it("classifies the countdown post as background", () => {
+    const p = kept.find((k) => k.id === 23770)!;
+    expect(classify(p.title.rendered)).toBe("background");
+  });
+
   for (const post of kept) {
     it(`parses post ${post.id} cleanly`, () => {
       const r = parseDispatchContent(post.content.rendered, post.excerpt.rendered);

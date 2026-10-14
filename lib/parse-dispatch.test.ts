@@ -168,6 +168,17 @@ describe("boilerplate stripping", () => {
     for (const bad of ["Quick links", "Media contact", "Writer:", "nope"]) expect(s).not.toContain(bad);
     expect(r.blocks).toHaveLength(1);
   });
+  it("removes Related coverage heading and link-only paragraphs (real Purdue shape)", () => {
+    const r = parse(
+      P("Lead.") +
+        '<h2 class="wp-block-heading">Related coverage</h2>' +
+        '<p class="wp-block-paragraph"><a href="https://example.com/a">Another story</a></p>' +
+        P('For those following, see the <a href="https://example.com">newsroom</a>.'),
+    );
+    expect(all(r)).not.toContain("Another story");
+    expect(all(r)).toContain("For those following");
+    expect(r.blocks).toHaveLength(1);
+  });
   it("removes Related coverage heading and its list", () => {
     const r = parse(P("Lead.") + "<h3>Related coverage</h3><ul><li>Link story</li></ul>" + P("Keep."));
     expect(all(r)).not.toContain("Link story");
