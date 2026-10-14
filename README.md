@@ -25,14 +25,7 @@ Phases: `departed`, `tarawa`, `at_sea`, `arrived`, `base_camp`, `surface_survey`
 `sonar`, `hydroprobe`, `dredge`, `verdict`, `return`.
 Verdicts: `investigating`, `promising`, `confirmed_electra`, `not_electra`, `inconclusive`.
 
-## Email alerts
+## Freshness
 
-GitHub Actions (`.github/workflows/check-dispatches.yml`) calls `/api/check-dispatches` every 30
-minutes with `Authorization: Bearer $CRON_SECRET`.
-
-- First run seeds Redis with existing posts and sends nothing.
-- `?dryRun=1` reports what would happen. `?test=1` sends the latest dispatch to `ADMIN_EMAIL` only.
-
-```bash
-curl -H "Authorization: Bearer $CRON_SECRET" "$SITE_URL/api/check-dispatches?dryRun=1"
-```
+Pages re-check Purdue at most every 10 minutes, so a new dispatch shows up on the site
+within about 10 minutes of publication. No cron job or database is involved.

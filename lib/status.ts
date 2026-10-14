@@ -164,3 +164,18 @@ export function statusSentence(status: Status, now: Date): string {
   }
   return PHASE_INFO[status.phase].sentence;
 }
+
+/**
+ * The hero's two lines: a small overline ("Day 2 on Nikumaroro") and the big sentence.
+ * Pass day = null when the current time isn't known yet (server render).
+ */
+export function statusParts(status: Status, day: number | null): { overline: string; sentence: string } {
+  let overline: string;
+  if (status.phase === "return") overline = "Sailing home";
+  else if (isOnIsland(status.phase)) overline = day !== null && day >= 1 ? `Day ${day} on Nikumaroro` : "On Nikumaroro";
+  else overline = "The 2026 expedition";
+  const sentence =
+    status.headline ??
+    (status.phase === "return" ? "The team is sailing back to Tarawa" : PHASE_INFO[status.phase].sentence);
+  return { overline, sentence };
+}

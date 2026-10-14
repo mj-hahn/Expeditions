@@ -20,7 +20,7 @@ export function buildPostsUrl(): string {
 }
 
 export function userAgent(): string {
-  return `TaraiaWatch/1.0 (+${siteUrl()}; contact: ${process.env.ADMIN_EMAIL ?? "n/a"})`;
+  return `TaraiaWatch/1.0 (+${siteUrl()})`;
 }
 
 export async function fetchPurduePosts(init?: RequestInit): Promise<WpPost[]> {

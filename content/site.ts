@@ -20,6 +20,9 @@ export const site = {
   openMeteoUrl: "https://open-meteo.com/",
 } as const;
 
+/** Absolute base URL. Falls back to Vercel's production domain, then localhost. */
 export function siteUrl(): string {
-  return (process.env.SITE_URL ?? "http://localhost:3000").replace(/\/+$/, "");
+  const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  const url = process.env.SITE_URL || (vercel ? `https://${vercel}` : "http://localhost:3000");
+  return url.replace(/\/+$/, "");
 }

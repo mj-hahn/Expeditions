@@ -13,14 +13,11 @@
     "fixture": "node scripts/fetch-fixture.mjs"
   },
   "dependencies": {
-    "@react-email/components": "^1.0.12",
-    "@react-email/render": "^2.1.0",
-    "@upstash/redis": "^1.39.0",
     "cheerio": "^1.2.0",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "resend": "^6.32.1"
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

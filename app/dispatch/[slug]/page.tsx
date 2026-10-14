@@ -6,6 +6,7 @@ import { Blocks } from "@/components/dispatch/Blocks";
 import { ZoomFigure } from "@/components/dispatch/ZoomFigure";
 import { DispatchTimes } from "@/components/DispatchTimes";
 import { Footer } from "@/components/Footer";
+import { ShareButton } from "@/components/ShareButton";
 import { site } from "@/content/site";
 import { getDispatchBySlug, getDispatches } from "@/lib/dispatches";
 import { shortTitle } from "@/lib/purdue";
@@ -30,6 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/dispatch/[slug]">
     title: shortTitle(d.title),
     description: d.lead.slice(0, 200),
     openGraph: { title: d.title, description: d.lead.slice(0, 200), type: "article" },
+    twitter: { card: "summary_large_image", title: d.title },
   };
 }
 
@@ -128,6 +130,9 @@ async function DispatchArticle({ params }: { params: PageProps<"/dispatch/[slug]
       )}
 
       <div className="mt-10">
+        <ShareButton title={d.title} path={`/dispatch/${d.slug}`} label="Share this dispatch" tone="outline" />
+      </div>
+      <div className="mt-6">
         <SourceLine d={d} />
       </div>
       <PrevNext newer={newer} older={older} />
