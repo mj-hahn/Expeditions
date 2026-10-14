@@ -3,6 +3,7 @@ import {
   PHASE_INFO,
   getStatus,
   isOnIsland,
+  statusParts,
   parseStatus,
   phaseIndex,
   statusSentence,
@@ -76,5 +77,20 @@ describe("statusSentence", () => {
   });
   it("return", () => {
     expect(statusSentence({ ...base, phase: "return" }, onIsland)).toBe("Sailing home");
+  });
+});
+
+describe("statusParts", () => {
+  const base = parseStatus({ phase: "sonar", verdict: "investigating", headline: null, note: null, updatedAt: "" });
+  it("shows the island day when known", () => {
+    expect(statusParts(base, 3)).toEqual({ overline: "Day 3 on Nikumaroro", sentence: "Scanning the lagoon with sonar" });
+  });
+  it("falls back when the day is unknown", () => {
+    expect(statusParts(base, null).overline).toBe("On Nikumaroro");
+  });
+  it("uses the headline override and the return phase", () => {
+    expect(statusParts({ ...base, headline: "Big news" }, 2).sentence).toBe("Big news");
+    expect(statusParts({ ...base, phase: "return" }, 9)).toEqual({ overline: "Sailing home", sentence: "The team is sailing back to Tarawa" });
+    expect(statusParts({ ...base, phase: "at_sea" }, -2).overline).toBe("The 2026 expedition");
   });
 });

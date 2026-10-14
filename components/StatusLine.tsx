@@ -1,6 +1,6 @@
 "use client";
 
-import { isOnIsland, PHASE_INFO } from "@/lib/status";
+import { statusParts } from "@/lib/status";
 import { islandDayNumber } from "@/lib/time";
 import { useNow } from "@/lib/use-now";
 import type { Status } from "@/lib/types";
@@ -13,15 +13,7 @@ import type { Status } from "@/lib/types";
 export function StatusLine({ status }: { status: Status }) {
   const now = useNow();
   const day = now === null ? null : islandDayNumber(new Date(now));
-  const onIsland = isOnIsland(status.phase);
-
-  let overline: string | null = null;
-  if (status.phase === "return") overline = "Sailing home";
-  else if (onIsland) overline = day !== null && day >= 1 ? `Day ${day} on Nikumaroro` : "On Nikumaroro";
-  else overline = "The 2026 expedition";
-
-  const sentence =
-    status.headline ?? (status.phase === "return" ? "The team is sailing back to Tarawa" : PHASE_INFO[status.phase].sentence);
+  const { overline, sentence } = statusParts(status, day);
 
   return (
     <div>
