@@ -6,7 +6,7 @@ const KIND = { video: "Video", podcast: "Podcast", site: "Website" } as const;
 export function InTheNews() {
   return (
     <section aria-labelledby="news-heading" className="mx-auto max-w-[720px] px-5 pt-14 pb-14 sm:px-8">
-      <SectionHeading kicker="In the news" title="Elsewhere on the story" id="news-heading" />
+      <SectionHeading kicker="Worth a look" title="Podcasts, video and the official site" id="news-heading" />
       <ul className="space-y-3">
         {PRESS.map((p) => (
           <li key={p.url}>

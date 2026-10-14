@@ -9,7 +9,17 @@ import { shortTitle } from "@/lib/purdue";
 import { formatShortDate } from "@/lib/time";
 import type { Dispatch, Status } from "@/lib/types";
 
-export function StatusHero({ status, latest, recent = [] }: { status: Status; latest?: Dispatch; recent?: Dispatch[] }) {
+export function StatusHero({
+  status,
+  latest,
+  recent = [],
+  news = [],
+}: {
+  status: Status;
+  latest?: Dispatch;
+  recent?: Dispatch[];
+  news?: { publishedAt: string }[];
+}) {
   // "Luisa’s Lookout" → "Luisa’s" + gold "Lookout".
   const cut = site.name.lastIndexOf(" ");
   const first = cut > 0 ? site.name.slice(0, cut) : site.name;
@@ -53,6 +63,7 @@ export function StatusHero({ status, latest, recent = [] }: { status: Status; la
 
         <SinceLastVisit
           items={recent.map((d) => ({ slug: d.slug, title: shortTitle(d.title), publishedAt: d.publishedAt.toISOString() }))}
+          news={news.map((n) => ({ publishedAt: n.publishedAt }))}
         />
 
         {status.note && (

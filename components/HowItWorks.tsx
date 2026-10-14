@@ -4,7 +4,7 @@ export function HowItWorks() {
     {
       icon: "↓",
       title: "Keep scrolling for more.",
-      body: "Below the latest news: the weather on the island right now, how far the search has got, a map of the journey, every dispatch so far, and the story behind the search.",
+      body: "Below the latest dispatch: headlines and videos from around the web, the weather on the island right now, how far the search has got, a map of the journey, every dispatch so far, and the story behind the search.",
     },
     {
       icon: "↻",
